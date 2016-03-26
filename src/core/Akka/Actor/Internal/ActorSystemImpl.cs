@@ -40,6 +40,7 @@ namespace Akka.Actor.Internal
         private IScheduler _scheduler;
         private ActorProducerPipelineResolver _actorProducerPipelineResolver;
         private TerminationCallbacks _terminationCallbacks;
+        private IDynamicAccess _dynamicAccess;
 
         public ActorSystemImpl(string name)
             : this(name, ConfigurationFactory.Load())
@@ -64,6 +65,7 @@ namespace Akka.Actor.Internal
             ConfigureMailboxes();
             ConfigureDispatchers();
             ConfigureActorProducerPipeline();
+            CreateDynamicAccess();
         }
 
         public override IActorRefProvider Provider { get { return _provider; } }
@@ -85,6 +87,10 @@ namespace Akka.Actor.Internal
         public override IInternalActorRef LookupRoot => _provider.RootGuardian;
         public override IInternalActorRef SystemGuardian { get { return _provider.SystemGuardian; } }
 
+        public override IDynamicAccess DynamicAccess
+        {
+            get { return _dynamicAccess; }
+        }
 
         /// <summary>Creates a new system actor.</summary>
         public override IActorRef SystemActorOf(Props props, string name = null)
@@ -423,6 +429,10 @@ namespace Akka.Actor.Internal
                 ((IInternalActorRef)actor).Stop();
         }
 
+        protected IDynamicAccess CreateDynamicAccess()
+        {
+            return new ReflectiveDynamicAccess(System.Reflection.Assembly.GetEntryAssembly());
+        }
     }
 
     class TerminationCallbacks
@@ -458,7 +468,6 @@ namespace Akka.Actor.Internal
 
             Add(code);
         }
-
         public Task TerminationTask { get { return _atomicRef.Value ?? _terminationTask; } }
     }
 }

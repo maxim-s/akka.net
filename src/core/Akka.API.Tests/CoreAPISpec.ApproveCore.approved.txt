@@ -2,6 +2,8 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("Akka.Cluster.TestKit")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("Akka.Cluster.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("Akka.Cluster.Tests.MultiNode")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("Akka.DistributedData")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("Akka.DistributedData.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("Akka.MultiNodeTestRunner.Shared.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("Akka.Remote")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("Akka.Remote.Tests")]
@@ -658,6 +660,7 @@ namespace Akka.Actor
     {
         protected ExtendedActorSystem() { }
         public abstract Akka.Actor.ActorProducerPipelineResolver ActorPipelineResolver { get; }
+        public abstract Akka.Actor.IDynamicAccess DynamicAccess { get; }
         public abstract Akka.Actor.IInternalActorRef Guardian { get; }
         public abstract Akka.Actor.IInternalActorRef LookupRoot { get; }
         public abstract Akka.Actor.IActorRefProvider Provider { get; }
@@ -972,6 +975,13 @@ namespace Akka.Actor
         public Identify(object messageId) { }
         public object MessageId { get; }
         public override string ToString() { }
+    }
+    public interface IDynamicAccess
+    {
+        System.Reflection.Assembly Assembly { get; }
+        T CreateInstanceFor<T>(System.Type type, params object[] args);
+        T CreateInstanceFor<T>(string fqcn, params object[] args);
+        System.Type GetClassFor<T>(string fqtn);
     }
     public interface IExtension { }
     public interface IExtensionId
@@ -1380,6 +1390,14 @@ namespace Akka.Actor
     {
         public static Akka.Actor.ReceiveTimeout Instance { get; }
     }
+    public class ReflectiveDynamicAccess : Akka.Actor.IDynamicAccess
+    {
+        public ReflectiveDynamicAccess(System.Reflection.Assembly assembly) { }
+        public System.Reflection.Assembly Assembly { get; }
+        public T CreateInstanceFor<T>(System.Type type, params object[] args) { }
+        public T CreateInstanceFor<T>(string fqcn, params object[] args) { }
+        public System.Type GetClassFor<T>(string fqtn) { }
+    }
     public class static RelativeActorPath
     {
         public static System.Collections.Generic.IEnumerable<string> Unapply(string addr) { }
@@ -1769,6 +1787,7 @@ namespace Akka.Actor.Internal
         public override Akka.Actor.ActorProducerPipelineResolver ActorPipelineResolver { get; }
         public override Akka.Actor.IActorRef DeadLetters { get; }
         public override Akka.Dispatch.Dispatchers Dispatchers { get; }
+        public override Akka.Actor.IDynamicAccess DynamicAccess { get; }
         public override Akka.Event.EventStream EventStream { get; }
         public override Akka.Actor.IInternalActorRef Guardian { get; }
         public override Akka.Event.ILoggingAdapter Log { get; }
@@ -1793,6 +1812,7 @@ namespace Akka.Actor.Internal
         public override bool AwaitTermination(System.TimeSpan timeout) { }
         [System.ObsoleteAttribute("Use WhenTerminated instead. This method will be removed in future versions")]
         public override bool AwaitTermination(System.TimeSpan timeout, System.Threading.CancellationToken cancellationToken) { }
+        protected Akka.Actor.IDynamicAccess CreateDynamicAccess() { }
         public override object GetExtension(Akka.Actor.IExtensionId extensionId) { }
         public override T GetExtension<T>()
             where T :  class, Akka.Actor.IExtension { }
