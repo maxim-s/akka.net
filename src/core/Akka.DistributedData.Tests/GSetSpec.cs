@@ -17,7 +17,7 @@ namespace Akka.DistributedData.Tests
         const string user4 = "{\"username\":\"charles\",\"password\":\"mingus\"}";
 
         [Fact]
-        public void AGSetMustBeAbleToAddAUser()
+        public void GSet_must_be_able_to_add_a_user()
         {
             var c1 = new GSet<string>();
             var c2 = c1.Add(user1);
@@ -32,7 +32,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void AGSetMustBeAbleToMergeWithUniqueSets()
+        public void GSet_must_be_able_to_merge_with_unique_sets()
         {
             var c11 = new GSet<string>();
             var c12 = c11.Add(user1);
@@ -56,7 +56,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void AGSetMustBeAbleToMergeWithNonUniqueSets()
+        public void GSet_must_be_able_to_merge_with_non_unique_sets()
         {
             var c11 = new GSet<string>();
             var c12 = c11.Add(user1);
