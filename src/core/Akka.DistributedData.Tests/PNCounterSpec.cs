@@ -22,7 +22,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void APNCounterMustBeAbleToIncrementEachNodesRecordByOne()
+        public void PNCounter_must_be_able_to_increment_each_nodes_record_by_one()
         {
             var c1 = new PNCounter();
 
@@ -38,7 +38,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void APNCounterMustBeAbleToDecrementEachNodesRecordByOne()
+        public void PNCounter_must_be_able_to_decrement_each_nodes_record_by_one()
         {
             var c1 = new PNCounter();
 
@@ -54,7 +54,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void APNCounterMustBeAbleToIncrementEachNodesRecordByArbitraryDelta()
+        public void PNCounter_must_be_able_to_increment_each_nodes_record_by_arbitrary_delta()
         {
             var c1 = new PNCounter();
 
@@ -84,7 +84,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void APNCounterMustbBeAbleToIncrementAndDecrementEachNodesRecordByArbitraryDelta()
+        public void PNCounter_mustb_be_able_to_increment_and_decrement_each_nodes_record_by_arbitrary_delta()
         {
             var c1 = new PNCounter();
 
@@ -99,7 +99,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void APNCounterMustbBeAbleToSummarizeTheHistoryToTheCorrectAggregatedValueOfIncrementsAndDecrements()
+        public void PNCounter_mustb_be_able_to_summarize_the_history_to_the_correct_aggregated_value_of_increments_and_decrements()
         {
             var c1 = new PNCounter();
 
@@ -116,7 +116,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void APNCounterMustbBeAbleToHaveItsHistoryCorrectlyMergedWithAnotherPNCounter()
+        public void PNCounter_mustb_be_able_to_have_its_history_correctly_merged_with_another_PNCounter()
         {
             var c11 = new PNCounter();
             var c12 = c11.Increment(_address1, 3);
@@ -154,7 +154,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void APNCounterMustHaveSupportForPruning()
+        public void PNCounter_must_have_support_for_pruning()
         {
             var c1 = new PNCounter();
             var c2 = c1.Increment(_address1);

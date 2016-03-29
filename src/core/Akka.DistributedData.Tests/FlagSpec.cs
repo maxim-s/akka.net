@@ -12,7 +12,7 @@ namespace Akka.DistributedData.Tests
     public class FlagSpec
     {
         [Fact]
-        public void AFlagMustBeAbleToSwitchOnOnce()
+        public void Flag_must_be_able_to_switch_on_once()
         {
             var f1 = new Flag();
             var f2 = f1.SwitchOn();
@@ -24,7 +24,7 @@ namespace Akka.DistributedData.Tests
         }
 
         [Fact]
-        public void AFlagMustMergeByPickingTrue()
+        public void Flag_must_merge_by_picking_true()
         {
             var f1 = new Flag(false);
             var f2 = f1.SwitchOn();
