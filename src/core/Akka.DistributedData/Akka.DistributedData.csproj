@@ -63,6 +63,7 @@
     <Compile Include="GCounter.cs" />
     <Compile Include="Get.cs" />
     <Compile Include="GetKeys.cs" />
+    <Compile Include="ORSet.cs" />
     <Compile Include="VersionVector.cs" />
     <Compile Include="GSet.cs" />
     <Compile Include="ICommand.cs" />
