@@ -69,11 +69,7 @@ namespace Akka.Actor
             get { return _host == null; }
         }
 
-        public bool HasGlobalScope
-        {
-            get { return _host != null; }
-        }
-
+        /// <summary>
         /// Returns true if this Address is usable globally. Unlike locally defined addresses <see cref="HasLocalScope"/>
         /// addresses of global scope are safe to sent to other hosts, as they globally and uniquely identify an addressable
         /// entity.

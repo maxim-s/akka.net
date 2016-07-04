@@ -40,7 +40,6 @@ namespace Akka.Actor.Internal
         private IScheduler _scheduler;
         private ActorProducerPipelineResolver _actorProducerPipelineResolver;
         private TerminationCallbacks _terminationCallbacks;
-        private IDynamicAccess _dynamicAccess;
 
         public ActorSystemImpl(string name)
             : this(name, ConfigurationFactory.Load())
@@ -86,11 +85,6 @@ namespace Akka.Actor.Internal
         public override IInternalActorRef Guardian { get { return _provider.Guardian; } }
         public override IInternalActorRef LookupRoot => _provider.RootGuardian;
         public override IInternalActorRef SystemGuardian { get { return _provider.SystemGuardian; } }
-
-        public override IDynamicAccess DynamicAccess
-        {
-            get { return _dynamicAccess; }
-        }
 
         /// <summary>Creates a new system actor.</summary>
         public override IActorRef SystemActorOf(Props props, string name = null)

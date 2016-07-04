@@ -120,8 +120,8 @@ namespace Akka.Cluster
         /// <summary>
         ///  `Address` ordering type class, sorts addresses by host and port.
         /// </summary>
-        internal static readonly AddressComparer AddressOrdering = new AddressComparer();
-        internal class AddressComparer : IComparer<Address>
+        public static readonly AddressComparer AddressOrdering = new AddressComparer();
+        public class AddressComparer : IComparer<Address>
         {
             public int Compare(Address x, Address y)
             {

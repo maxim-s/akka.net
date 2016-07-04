@@ -53,10 +53,10 @@ namespace Akka.Actor
         /// terminated.</summary>
         public abstract IActorRef SystemActorOf<TActor>(string name = null) where TActor : ActorBase, new();
 
-        /// <summary>The wrapper which is used by the framework to perform any reflective
-        /// operations in order to retrieve types at runtime. By default, uses the same
-        /// assembly which the ActorSystem was loaded into.</summary>
-        public abstract IDynamicAccess DynamicAccess { get; }
+        /// <summary>
+        /// Aggressively terminates an <see cref="ActorSystem"/> without waiting for the normal shutdown process to run as-is.
+        /// </summary>
+        public abstract void Abort();
 
         //TODO: Missing threadFactory, printTree
         //  /**
