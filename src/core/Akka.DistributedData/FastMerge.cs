@@ -45,9 +45,9 @@ namespace Akka.DistributedData
         /// <summary>
         /// INTERNAL API: should be used from merge
         /// </summary>
-        public static bool IsAncestorOf(this IFastMerge fastMerge, IFastMerge that) 
+        public static bool IsAncestorOf(this IFastMerge fastMerge, IFastMerge that)
         {
-            return that.Ancestor.Equals(fastMerge);
+            return that.Ancestor != null ? that.Ancestor.Equals(fastMerge) : false;
         }
     }
 

@@ -14,7 +14,12 @@ using Akka.DistributedData.Proto;
 
 namespace Akka.DistributedData
 {
-    internal interface IORSet<T>
+
+    internal interface IORSet
+    {
+        
+    }
+    internal interface IORSet<T> : IORSet
     {
         IImmutableSet<T> Elements { get; }
     }
@@ -23,7 +28,7 @@ namespace Akka.DistributedData
     {
         public static ORSet<T> Create<T>(IImmutableSet<T> elements)
         {
-            return new ORSet<T>(elements);
+            return ORSet<T>.Empty;
         }
 
         /// <summary>
@@ -158,7 +163,7 @@ namespace Akka.DistributedData
             return keys.Aggregate(accumulator, (acc, k) =>
             {
                 var dots = elementsMap[k];
-                if (versionVector.IsAfter(dots) || versionVector.IsConcurent(dots))
+                if (versionVector.IsAfter(dots) || versionVector.IsSame(dots))
                 {
                     return acc;
                 }
@@ -173,43 +178,32 @@ namespace Akka.DistributedData
     public sealed class ORSet<T> : IReplicatedDataSerialization, IORSet<T>, IRemovedNodePruning<ORSet<T>>, IFastMerge
     {
         private readonly VersionVector _dot = VersionVector.Create();
-        private readonly IImmutableSet<T> _elements;
+        public static readonly ORSet<T> Empty = new ORSet<T>(ImmutableDictionary<T, VersionVector>.Empty, VersionVector.Empty);
 
         public ORSet(IImmutableDictionary<T, VersionVector> elementsMap, VersionVector versionVector)
-            : this(ImmutableHashSet<T>.Empty)
         {
             ElementsMap = elementsMap;
             VersionVector = versionVector;
         }
 
-        public ORSet(IImmutableSet<T> elements)
-        {
-            _elements = elements;
-        }
-
-        public IImmutableDictionary<T, VersionVector> ElementsMap { get; set; }
-        public VersionVector VersionVector { get; set; }
-
-        public IImmutableSet<T> Elements
-        {
-            get { return _elements; }
-        }
+        public IImmutableDictionary<T, VersionVector> ElementsMap { get; private set; }
+        public VersionVector VersionVector { get; private set; }
 
         public bool IsEmpty
         {
-            get { return _elements.Count == 0; }
+            get { return ElementsMap.Count == 0; }
         }
 
         public int Count
         {
-            get { return _elements.Count; }
+            get { return ElementsMap.Count; }
         }
 
         public IFastMerge Ancestor { get; set; }
 
-        IImmutableSet<T> IORSet<T>.Elements
+        public IImmutableSet<T> Elements
         {
-            get { return _elements.ToImmutableHashSet(); }
+            get { return ImmutableHashSet<T>.Empty.Union(ElementsMap.Keys); }
         }
 
 
@@ -236,16 +230,16 @@ namespace Akka.DistributedData
                 return (ORSet<T>) that.ClearAncestor();
             }
             var commonKeys = ElementsMap.Count < that.ElementsMap.Count
-                ? ElementsMap.Where(e => that.ElementsMap.Contains(e)).Select(i => i.Key).ToImmutableHashSet()
-                : that.ElementsMap.Where(e => ElementsMap.Contains(e)).Select(i => i.Key).ToImmutableHashSet();
+                ? ElementsMap.Where(e => that.ElementsMap.ContainsKey(e.Key)).Select(i => i.Key).ToImmutableHashSet()
+                : that.ElementsMap.Where(e => ElementsMap.ContainsKey(e.Key)).Select(i => i.Key).ToImmutableHashSet();
 
 
             var entries00 = ORSet.MergeCommonKeys(commonKeys, this, that);
             var thisUniqueKeys =
-                ElementsMap.Where(e => !that.ElementsMap.Contains(e)).Select(i => i.Key).ToImmutableHashSet();
+                ElementsMap.Where(e => !that.ElementsMap.ContainsKey(e.Key)).Select(i => i.Key).ToImmutableHashSet();
             var entries0 = ORSet.MergeDisjointKeys(thisUniqueKeys, ElementsMap, that.VersionVector, entries00);
             var thatUniqueKeys =
-                that.ElementsMap.Where(e => !ElementsMap.Contains(e)).Select(i => i.Key).ToImmutableHashSet();
+                that.ElementsMap.Where(e => !ElementsMap.ContainsKey(e.Key)).Select(i => i.Key).ToImmutableHashSet();
             var entries = ORSet.MergeDisjointKeys(thatUniqueKeys, that.ElementsMap, VersionVector, entries0);
             var mergedVvector = VersionVector.Merge(that.VersionVector);
 
@@ -259,7 +253,7 @@ namespace Akka.DistributedData
         }
 
 
-        ORSet<T> IRemovedNodePruning<ORSet<T>>.Prune(UniqueAddress removedNode, UniqueAddress collapseInto)
+        public ORSet<T> Prune(UniqueAddress removedNode, UniqueAddress collapseInto)
         {
             var pruned = ElementsMap.Aggregate(ImmutableDictionary<T, VersionVector>.Empty,
                 (acc, k) =>
@@ -276,7 +270,7 @@ namespace Akka.DistributedData
                 (acc, k) => acc.Add(collapseInto, k));
         }
 
-        ORSet<T> IRemovedNodePruning<ORSet<T>>.PruningCleanup(UniqueAddress removedNode)
+        public ORSet<T> PruningCleanup(UniqueAddress removedNode)
         {
             var updated = ElementsMap.Aggregate(ElementsMap, (acc, k) => k.Value.NeedPruningFrom(removedNode)
                 ? acc.SetItem(k.Key, k.Value.PruningCleanup(removedNode))
@@ -293,19 +287,14 @@ namespace Akka.DistributedData
 
         public bool Contains(T element)
         {
-            return _elements.Contains(element);
+            return ElementsMap.ContainsKey(element);
         }
 
 
         /// <summary>
         ///     Adds an element to the set
         /// </summary>
-        public ORSet<T> Add(T element)
-        {
-            return new ORSet<T>(_elements.Add(element));
-        }
-
-        private ORSet<T> Add(UniqueAddress node, T element)
+        public ORSet<T> Add(UniqueAddress node, T element)
         {
             var newVector = VersionVector.Add(node);
             var newDot =
@@ -329,7 +318,7 @@ namespace Akka.DistributedData
             var other = obj as ORSet<T>;
             if (other != null)
             {
-                var elementsEqual = _elements.SetEquals(other.Elements);
+                var elementsEqual = Elements.SetEquals(other.Elements);
                 return elementsEqual;
             }
             return false;

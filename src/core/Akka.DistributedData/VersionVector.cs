@@ -87,7 +87,7 @@ namespace Akka.DistributedData
         /// <summary>
         ///     Returns true if this VersionVector has the same history as the 'that' VersionVector else false.
         /// </summary>
-        public bool HasTheSameHistory(VersionVector that)
+        public bool IsSame(VersionVector that)
         {
             return CompareOnlyTo(that, Ordering.Same) == Ordering.Same;
         }
