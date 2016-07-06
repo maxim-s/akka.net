@@ -240,6 +240,22 @@ namespace Akka.DistributedData
         }
     }
 
+    public sealed class ORMapKey<T> : Key<ORMap<T>>, IKeyWithGenericType, IORSetKey, IReplicatedDataSerialization where T : IReplicatedData
+    {
+        private readonly Type _type;
+
+        public ORMapKey(string id)
+            : base(id)
+        {
+            _type = typeof(T);
+        }
+
+        public Type Type
+        {
+            get { return _type; }
+        }
+    }
+
 
 
 }

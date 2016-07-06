@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 //  <copyright file="Replicator.cs" company="Akka.NET Project">
-//      Copyright (C) 2009-2016 Typesafe Inc. <http://www.typesafe.com>
+//      Copyright (C) 2009-2016 Lightbend Inc. <http://www.lightbend.com>
 //      Copyright (C) 2013-2016 Akka.NET project <https://github.com/akkadotnet/akka.net>
 //  </copyright>
 // -----------------------------------------------------------------------
@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -82,15 +83,16 @@ namespace Akka.DistributedData
             {
                 throw new ArgumentException("Cluster node must not be terminated");
             }
+            StandardOutWriter.WriteLine("Role " + _settings.Role + " " + _cluster.SelfRoles.Count);
             if (!string.IsNullOrEmpty(_settings.Role) && !_cluster.SelfRoles.Contains(_settings.Role))
             {
                 throw new ArgumentException(string.Format("The cluster node {0} does not have the role {1}", _selfAddress, _settings.Role));
             }
 
-            //_gossipTask = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(_settings.GossipInterval, _settings.GossipInterval, Self, GossipTick.Instance, Self);
+            _gossipTask = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(_settings.GossipInterval, _settings.GossipInterval, Self, GossipTick.Instance, Self);
             _notifyTask = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(_settings.NotifySubscribersInterval, _settings.NotifySubscribersInterval, Self, FlushChanges.Instance, Self);
-            //_pruningTask = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(_settings.PruningInterval, _settings.PruningInterval, Self, RemovedNodePruningTick.Instance, Self);
-            //_clockTask = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(_settings.GossipInterval, _settings.GossipInterval, Self, ClockTick.Instance, Self);
+            _pruningTask = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(_settings.PruningInterval, _settings.PruningInterval, Self, RemovedNodePruningTick.Instance, Self);
+            _clockTask = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(_settings.GossipInterval, _settings.GossipInterval, Self, ClockTick.Instance, Self);
 
             _serializer = Context.System.Serialization.FindSerializerForType(typeof(DataEnvelope));
             _maxPruningDisseminationNanos = _settings.MaxPruningDissemination.Ticks * 100;

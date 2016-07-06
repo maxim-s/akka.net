@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
-//  <copyright file="GCounter.cs" company="Akka.NET Project">
-//      Copyright (C) 2009-2016 Typesafe Inc. <http://www.typesafe.com>
+//  <copyright file="Replicator.cs" company="Akka.NET Project">
+//      Copyright (C) 2009-2016 Lightbend Inc. <http://www.lightbend.com>
 //      Copyright (C) 2013-2016 Akka.NET project <https://github.com/akkadotnet/akka.net>
 //  </copyright>
 // -----------------------------------------------------------------------
@@ -93,6 +93,11 @@ namespace Akka.DistributedData
         public GCounter Increment(UniqueAddress node, long delta)
         {
             return Increment(node, new BigInteger(delta));
+        }
+
+        public GCounter Increment(Cluster.Cluster node, long delta)
+        {
+            return Increment(node.SelfUniqueAddress, new BigInteger(delta));
         }
 
         public GCounter Increment(UniqueAddress node, BigInteger delta)

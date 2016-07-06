@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
-//  <copyright file="GetKeys.cs" company="Akka.NET Project">
-//      Copyright (C) 2009-2016 Typesafe Inc. <http://www.typesafe.com>
+//  <copyright file="Replicator.cs" company="Akka.NET Project">
+//      Copyright (C) 2009-2016 Lightbend Inc. <http://www.lightbend.com>
 //      Copyright (C) 2013-2016 Akka.NET project <https://github.com/akkadotnet/akka.net>
 //  </copyright>
 // -----------------------------------------------------------------------
@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 
 namespace Akka.DistributedData
 {
-    internal class GetKeyIds
+    public class GetKeyIds
     {
         static readonly GetKeyIds _instance = new GetKeyIds();
 
@@ -27,7 +27,7 @@ namespace Akka.DistributedData
         }
     }
 
-    internal sealed class GetKeysIdsResult
+    public sealed class GetKeysIdsResult
     {
         private readonly IImmutableSet<string> _keys;
 
@@ -36,7 +36,7 @@ namespace Akka.DistributedData
             _keys = keys;
         }
 
-        internal IImmutableSet<string> Keys
+        public IImmutableSet<string> Keys
         {
             get { return _keys; }
         }

@@ -1,26 +1,29 @@
 ﻿// -----------------------------------------------------------------------
 //  <copyright file="ReplicatorSettings.cs" company="Akka.NET Project">
-//      Copyright (C) 2009-2016 Typesafe Inc. <http://www.typesafe.com>
+//      Copyright (C) 2009-2016 Lightbend Inc. <http://www.lightbend.com>
 //      Copyright (C) 2013-2016 Akka.NET project <https://github.com/akkadotnet/akka.net>
 //  </copyright>
 // -----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using Akka.Actor;
 using Akka.Configuration;
 using Akka.Dispatch;
+using Akka.DistributedData.Configuration;
+using Akka.Util;
 
 namespace Akka.DistributedData
 {
     public class ReplicatorSettings : ICloneable
     {
-        private readonly string _dispatcher;
-        private readonly TimeSpan _gossipInterval;
-        private readonly int _maxDeltaElements;
-        private readonly TimeSpan _maxPruningDissemination;
-        private readonly TimeSpan _notifySubscribersInterval;
-        private readonly TimeSpan _pruningInterval;
-        private readonly string _role;
+        private string _dispatcher;
+        private TimeSpan _gossipInterval;
+        private int _maxDeltaElements;
+        private TimeSpan _maxPruningDissemination;
+        private TimeSpan _notifySubscribersInterval;
+        private TimeSpan _pruningInterval;
+        private string _role;
 
         public ReplicatorSettings(string role,
                                   TimeSpan gossipInterval,
@@ -29,6 +32,12 @@ namespace Akka.DistributedData
                                   string dispatcher,
                                   TimeSpan pruningInterval,
                                   TimeSpan maxPruningDissemination)
+        {
+            Init(role, gossipInterval, notifySubscribersInterval, maxDeltaElements, dispatcher, pruningInterval, maxPruningDissemination);
+        }
+
+        private void Init(string role, TimeSpan gossipInterval, TimeSpan notifySubscribersInterval, int maxDeltaElements,
+            string dispatcher, TimeSpan pruningInterval, TimeSpan maxPruningDissemination)
         {
             _role = role;
             _gossipInterval = gossipInterval;
@@ -39,23 +48,29 @@ namespace Akka.DistributedData
             _maxPruningDissemination = maxPruningDissemination;
         }
 
-        public ReplicatorSettings(Config config)
-            : this(config.GetString("role", null),
-                   config.GetTimeSpan("gossip-interval", TimeSpan.FromSeconds(2.0)),
-                   config.GetTimeSpan("notify-subscribers-interval", TimeSpan.FromMilliseconds(500.0)),
-                   config.GetInt("max-delta-elements", 1000),
-                   config.GetString("use-dispatcher", Dispatchers.DefaultDispatcherId),
-                   config.GetTimeSpan("pruning-interval", TimeSpan.FromSeconds(30.0)),
-                   config.GetTimeSpan("max-pruning-dissemination", TimeSpan.FromSeconds(60.0)))
-        { }
+        private void Init(Config config)
+        {
+            Init(config.GetString("role", null),
+               config.GetTimeSpan("gossip-interval", TimeSpan.FromSeconds(2.0)),
+               config.GetTimeSpan("notify-subscribers-interval", TimeSpan.FromMilliseconds(500.0)),
+               config.GetInt("max-delta-elements", 1000),
+               config.GetString("use-dispatcher", Dispatchers.DefaultDispatcherId),
+               config.GetTimeSpan("pruning-interval", TimeSpan.FromSeconds(30.0)),
+               config.GetTimeSpan("max-pruning-dissemination", TimeSpan.FromSeconds(60.0)));
+        }
 
-        public ReplicatorSettings()
-            : this(ConfigurationFactory.ParseString(""))
-        { }
+        public ReplicatorSettings(Config config)
+        {
+            Init(config);
+        }
 
         public ReplicatorSettings(ActorSystem system)
-            : this(system.Settings.Config.GetConfig("akka.cluster.distributed-data"))
-        { }
+        {
+            var cfg = system.Settings.Config.GetConfig("Akka.DistributedData.Configuration")
+                .SafeWithFallback(DistributedDataConfigFactory.Default());
+            Init(cfg);
+
+        }
 
         public string Role
         {

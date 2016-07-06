@@ -7,6 +7,7 @@
 
 using Akka.Actor;
 using Akka.Configuration;
+using Akka.DistributedData.Configuration;
 
 namespace Akka.DistributedData
 {
@@ -19,7 +20,7 @@ namespace Akka.DistributedData
 
         public DistributedData(ExtendedActorSystem system)
         {
-            _config = system.Settings.Config.GetConfig("akka.cluster.distributed-data");
+            _config = DistributedDataConfigFactory.Default();
             _settings = new ReplicatorSettings(_config);
             _system = system;
             if(IsTerminated)
